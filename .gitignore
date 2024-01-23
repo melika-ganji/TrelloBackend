@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+*.log
+*.sqlite
+*.log.*
+*.db
+
+.env
+
+*.dll
+*.exe
+*.bin
+*.so
+*.dylib

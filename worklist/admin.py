@@ -27,11 +27,11 @@ class ListAdmin(admin.ModelAdmin):
 
 @register(Card)
 class CardAdmin(admin.ModelAdmin):
-    list_display = ['title',
+    list_display = ['id', 'title',
                     'deadline', 'is_finished',
                     'list', 'tag', 'description']
 
 
 @register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ["card", "text"]
+    list_display = ['id', "card", "text"]

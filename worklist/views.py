@@ -5,9 +5,9 @@ from rest_framework.generics import ListCreateAPIView
 from rest_framework import permissions, status
 from django_filters import rest_framework as filters
 
-from worklist.models import Board, Card, List
+from worklist.models import Board, Card, List, Comment
 from worklist.serializers import BoardSerializer, ListSerializer, CardSerializer, BoardDetailSerializer, \
-    BoardCreateSerializer, ListCreateSerializer, CardCreateSerializer
+    BoardCreateSerializer, ListCreateSerializer, CardCreateSerializer, CommentSerializer, CommentCreateSerializer
 
 filter_backends = (filters.DjangoFilterBackend,)
 
@@ -145,6 +145,67 @@ class CardCreateAPIView(ListCreateAPIView):
         # print(admin)
         # if list_info.id != request.user.id:
         #     return Response(status=status.HTTP_403_FORBIDDEN)
+
+
+class CommentAPIView(ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        card_id = self.kwargs.get('id')
+        print(card_id)
+        if card_id:
+            return Comment.objects.filter(card=card_id, parent_comment=None)
+        # else:
+        #     return Comment.objects.filter(parent_comment=None)
+
+
+class CommentCreateAPIView(ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = CommentCreateSerializer
+
+    def get_queryset(self):
+        card_id = self.kwargs.get('card_id')
+        if card_id:
+            return Comment.objects.filter(card=card_id, parent_comment=None)
+        else:
+            return Comment.objects.filter(parent_comment=None)
+
+    def post(self, request, *args, **kwargs):
+        card_id = self.request.data.get('card', None)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if card_id:
+            card = Card.objects.get(pk=card_id)
+            serializer.save(card=card)
+        else:
+            serializer.save()
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+# def post(self, request, *args, **kwargs):
+   #     card_id = self.request.data.get('card', None)
+   #     # if card_id:
+   #     #     card = Card.objects.get(pk=card_id)
+   #     #     serializer.save(card=card)
+   #     # else:
+   #     #     serializer.save()
+   #     serializer = self.get_serializer(data=request.data)
+   #     serializer.is_valid(raise_exception=True)
+   #
+   #     # Associate the comment with the specified card
+   #     if card_id:
+   #         card = Card.objects.get(pk=card_id)
+   #         serializer.save(card=card)
+   #     else:
+   #         serializer.save()
+   #
+   #     headers = self.get_success_headers(serializer.data)
+   #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 
 def getBoardId(request, name):

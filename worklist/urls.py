@@ -1,6 +1,6 @@
 from django.urls import path
 from worklist.views import (BoardAPIView, BoardDetailAPIView, BoardCreateAPIView, ListCreateAPIView, getBoardId,
-                            CardCreateAPIView, getListId)
+                            CardCreateAPIView, getListId, CommentAPIView, CommentCreateAPIView)
 
 
 urlpatterns = [
@@ -11,4 +11,6 @@ urlpatterns = [
     path('get/board/<str:name>/', getBoardId, name='board-id'),
     path('create/card/', CardCreateAPIView.as_view(), name='create-card'),
     path('get/list/<str:name>/', getListId, name='list-id'),
+    path('comment/<int:id>/', CommentAPIView.as_view(), name='comment-show'),
+    path('comment/', CommentCreateAPIView.as_view(), name='comment-create'),
 ]

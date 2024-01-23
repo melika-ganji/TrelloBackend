@@ -1,7 +1,32 @@
 from rest_framework import serializers
 
 from userprofile.serializers import UserSerializer
-from worklist.models import Board, List, Card
+from worklist.models import Board, List, Card, Comment
+
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    def get_replies(self, comment):
+        replies = Comment.objects.filter(parent_comment=comment)
+        serializer = CommentSerializer(replies, many=True)
+        return serializer.data
+
+    class Meta:
+        model = Comment
+        fields = '__all__'
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    replies = serializers.SerializerMethodField()
+    user = UserSerializer(allow_null=True)
+
+    def get_replies(self, comment):
+        replies = Comment.objects.filter(parent_comment=comment)
+        serializer = CommentSerializer(replies, many=True)
+        return serializer.data
+
+    class Meta:
+        model = Comment
+        fields = '__all__'
 
 
 class CardSerializer(serializers.ModelSerializer):
@@ -75,4 +100,3 @@ class BoardCreateSerializer(serializers.ModelSerializer):
     #             pass
     #
     #     return board
-
