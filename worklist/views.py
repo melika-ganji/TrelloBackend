@@ -1,5 +1,5 @@
 import django_filters
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponse
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView
 from rest_framework import permissions, status
@@ -117,23 +117,6 @@ class CardCreateAPIView(ListCreateAPIView):
         return Card.objects.filter(users__id=users.id)
 
     def post(self, request, *args, **kwargs):
-        # print(request.data)
-        # lst = self.request.data["list"]   #id hast
-        # list_info = List.objects.get(id=lst)
-        # board = Board.objects.get(id=list_info.board.id)  #title hast
-        # board_id = getBoardId(board)
-        # print("boardid", board_id)
-        # users = Board.objects.get(id=board_id).users
-        # print(users)
-
-        # flag = False
-        # for user in users:
-        #     if request.data["users"] == user:
-        #         flag = True
-        #         break
-        #
-        # if not flag:
-        #     return Response(status=status.HTTP_403_FORBIDDEN)
 
         serializer = CardCreateSerializer(data=request.data, context={"request": request})
 
@@ -141,10 +124,6 @@ class CardCreateAPIView(ListCreateAPIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        # print(admin)
-        # if list_info.id != request.user.id:
-        #     return Response(status=status.HTTP_403_FORBIDDEN)
 
 
 class CommentAPIView(ListAPIView):
@@ -156,8 +135,6 @@ class CommentAPIView(ListAPIView):
         print(card_id)
         if card_id:
             return Comment.objects.filter(card=card_id, parent_comment=None)
-        # else:
-        #     return Comment.objects.filter(parent_comment=None)
 
 
 class CommentCreateAPIView(ListCreateAPIView):
@@ -186,34 +163,37 @@ class CommentCreateAPIView(ListCreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-# def post(self, request, *args, **kwargs):
-   #     card_id = self.request.data.get('card', None)
-   #     # if card_id:
-   #     #     card = Card.objects.get(pk=card_id)
-   #     #     serializer.save(card=card)
-   #     # else:
-   #     #     serializer.save()
-   #     serializer = self.get_serializer(data=request.data)
-   #     serializer.is_valid(raise_exception=True)
-   #
-   #     # Associate the comment with the specified card
-   #     if card_id:
-   #         card = Card.objects.get(pk=card_id)
-   #         serializer.save(card=card)
-   #     else:
-   #         serializer.save()
-   #
-   #     headers = self.get_success_headers(serializer.data)
-   #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+def checkFinish(request, id, name):
+    card = Card.objects.get(id=id)
+
+    if card:
+        print(card.users, request.user.id)
+        if str(card.users) == name:
+            print("ok")
+            card.is_finished = True
+            card.save()
+            return HttpResponse(status.HTTP_202_ACCEPTED)
+        else:
+            return HttpResponse(status.HTTP_403_FORBIDDEN)
+    return Http404
 
 
+def getBoardId(request, name, username):
+    board = Board.objects.filter(title=name)
+    flag = False
 
-def getBoardId(request, name):
-    board = Board.objects.get(title=name)
     if board:
-        return JsonResponse({'id': board.id})
-    else:
-        return Http404
+        for b in board:
+            print(b.admin, username)
+            if str(b.admin).strip().lower() == username.strip().lower():
+                print("worked!")
+                flag = True
+                return JsonResponse({'id': b.id})
+
+        if not flag:
+            raise Http404
+
+    return JsonResponse({'error': 'Board not found'})
 
 
 def getListId(request, name):
@@ -221,4 +201,4 @@ def getListId(request, name):
     if lst:
         return JsonResponse({'id': lst.id})
     else:
-        return Http404
+        raise Http404

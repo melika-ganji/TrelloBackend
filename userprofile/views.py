@@ -1,12 +1,31 @@
 from django.contrib.auth.models import User
 from django.http import Http404, JsonResponse
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.generics import ListCreateAPIView
 from rest_framework import status, permissions
 from django.shortcuts import get_object_or_404
 
 from userprofile.models import Profile
-from userprofile.serializers import ProfileSerializer
+from userprofile.serializers import ProfileSerializer, UserCreateSerializer
+
+
+class UserCreateAPIView(ListCreateAPIView):
+    serializer_class = UserCreateSerializer
+    authentication_classes = ([])
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        if request.user is not None:
+            user_data = {'username': request.data.get('username'), 'password': request.data.get('password')}
+
+            user_serializer = UserCreateSerializer(data=user_data)
+
+            if user_serializer.is_valid():
+                User.objects.create_user(username=user_data['username'], password=user_data['password'])
+                return Response(user_serializer.data, status=status.HTTP_201_CREATED)
+
+            return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProfileAPIView(ListCreateAPIView):

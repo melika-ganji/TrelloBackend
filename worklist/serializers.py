@@ -84,19 +84,3 @@ class BoardCreateSerializer(serializers.ModelSerializer):
         model = Board
         fields = '__all__'
 
-    # def create(self, validated_data):
-    #     users_data = validated_data.pop('users')
-    #     board = Board.objects.create(**validated_data)
-    #
-    #     for user_data in users_data:
-    #         user_id = user_data
-    #         try:
-    #             # user = User.objects.get(id=user_id)
-    #             # print(user)
-    #             board.users.add(user_id)
-    #         except User.DoesNotExist:
-    #             print(users_data)
-    #             print("*****************")
-    #             pass
-    #
-    #     return board
