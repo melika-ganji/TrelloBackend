@@ -167,9 +167,7 @@ def checkFinish(request, id, name):
     card = Card.objects.get(id=id)
 
     if card:
-        print(card.users, request.user.id)
         if str(card.users) == name:
-            print("ok")
             card.is_finished = True
             card.save()
             return HttpResponse(status.HTTP_202_ACCEPTED)
