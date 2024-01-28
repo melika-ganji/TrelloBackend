@@ -5,7 +5,7 @@ from django.db import models
 class Board(models.Model):
     title = models.CharField(max_length=32)
     created_at = models.DateTimeField(auto_now=True)
-    users = models.ManyToManyField(User, null=True)
+    users = models.ManyToManyField(User)
     admin = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admin', null=True)
 
     def __str__(self):
