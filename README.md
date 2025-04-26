@@ -19,8 +19,13 @@ Search and Filter (Search cards, filter by label or due date)
 ___________________________________________________________________________________________________________________________
 # Technologies Used
 Python 3.11
+
 Django 5.x
+
 Django Rest Framework
+
 Django Filters
+
 PostgreSQL
+
 JWT
